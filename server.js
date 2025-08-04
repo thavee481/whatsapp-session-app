@@ -1,40 +1,33 @@
-const express = require('express');
-const { Client, LocalAuth } = require('whatsapp-web.js');
-const qrcode = require('qrcode');
-const cors = require('cors');
-const path = require('path');
-const fs = require('fs');
+const express = require("express");
+const cors = require("cors");
+const bodyParser = require("body-parser");
+const { v4: uuidv4 } = require("uuid");
 
 const app = express();
-app.use(express.json());
+const PORT = 3000;
+
 app.use(cors());
-app.use(express.static('public'));
+app.use(bodyParser.json());
+app.use(express.static("public")); // serve index.html if placed in 'public'
 
-let client;
+app.post("/generate-session", (req, res) => {
+  const { number } = req.body;
 
-app.post('/connect', async (req, res) => {
-  const { phone } = req.body;
-  if (!phone) return res.status(400).json({ message: "Phone number required." });
+  if (!number || !/^\+?\d{10,15}$/.test(number)) {
+    return res.status(400).json({ success: false, message: "Invalid number format." });
+  }
 
-  const sessionPath = `./session/${phone}`;
-  if (!fs.existsSync(sessionPath)) fs.mkdirSync(sessionPath, { recursive: true });
+  // Simulate session generation
+  const sessionId = uuidv4(); // Random UUID for session
 
-  client = new Client({
-    authStrategy: new LocalAuth({ dataPath: sessionPath }),
-    puppeteer: {
-      headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
-    }
-  });
+  // Here you’d typically call a WhatsApp API to initiate the session pairing
 
-  client.on('qr', async (qr) => {
-    const qrImage = await qrcode.toDataURL(qr);
-    res.json({ qr: qrImage });
-  });
+  return res.json({ success: true, sessionId });
+});
 
-  client.on('ready', () => {
-    console.log('Client is ready!');
-  });
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
+});
 
   client.initialize();
 });
