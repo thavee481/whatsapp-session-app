@@ -2,18 +2,79 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>WhatsApp Session ID Generator</title>
-  <link rel="stylesheet" href="style.css">
+  <title>WhatsApp Session Generator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #e5f4f1;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+    input[type="text"] {
+      padding: 10px;
+      width: 250px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #25D366;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #1ebd58;
+    }
+    #sessionOutput {
+      margin-top: 20px;
+      font-weight: bold;
+      color: #333;
+    }
+  </style>
 </head>
 <body>
   <div class="container">
-    <h1>WhatsApp Session Connector</h1>
-    <input type="text" id="phoneNumber" placeholder="Enter WhatsApp Number">
-    <button id="connectBtn">Generate Session & Connect</button>
-    <div id="qrCode"></div>
-    <div id="status"></div>
+    <h2>Enter WhatsApp Number</h2>
+    <input type="text" id="whatsappNumber" placeholder="+1234567890">
+    <br>
+    <button onclick="generateSession()">Generate</button>
+    <div id="sessionOutput"></div>
   </div>
 
-  <script src="script.js"></script>
+  <script>
+    async function generateSession() {
+      const number = document.getElementById("whatsappNumber").value.trim();
+      if (!number) {
+        alert("Please enter a WhatsApp number.");
+        return;
+      }
+
+      const res = await fetch("/generate-session", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ number })
+      });
+
+      const data = await res.json();
+      document.getElementById("sessionOutput").innerText = 
+        data.success 
+        ? `Session ID: ${data.sessionId}` 
+        : `Error: ${data.message}`;
+    }
+  </script>
 </body>
 </html>
